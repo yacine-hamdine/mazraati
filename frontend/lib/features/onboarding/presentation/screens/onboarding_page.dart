@@ -32,15 +32,29 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-        },
-        itemCount: _pages.length,
-        itemBuilder: (context, index) {
-          return _OnboardingContent(data: _pages[index]);
-        },
+      body: Column(
+        children: [
+          const SizedBox(height: 50),
+          // App Logo
+          Image.asset(
+            'assets/images/logo.png',
+            height: 80,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() => _currentIndex = index);
+              },
+              itemCount: _pages.length,
+              itemBuilder: (context, index) {
+                return _OnboardingContent(data: _pages[index]);
+              },
+            ),
+          ),
+        ],
       ),
       bottomSheet: Container(
         color: Colors.white,
@@ -50,11 +64,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextButton(
-              onPressed: () {
-                // Skip to last page
-                _pageController.jumpToPage(_pages.length - 1);
-              },
-              child: const Text('Passer'),
+              onPressed: () => _pageController.jumpToPage(_pages.length - 1),
+              child: Text('Passer', style: TextStyle(color: Colors.green[700])),
             ),
             Row(
               children: List.generate(_pages.length, (idx) {
@@ -63,9 +74,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: _currentIndex == idx
-                        ? Theme.of(context).primaryColor
-                        : Colors.grey,
+                    color: _currentIndex == idx ? Colors.green[700] : Colors.grey,
                     shape: BoxShape.circle,
                   ),
                 );
@@ -74,7 +83,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
             TextButton(
               onPressed: () {
                 if (_currentIndex == _pages.length - 1) {
-                  // Navigate to Auth Screen
                   Navigator.pushReplacementNamed(context, '/auth');
                 } else {
                   _pageController.nextPage(
@@ -83,9 +91,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   );
                 }
               },
-              child: Text(_currentIndex == _pages.length - 1
-                  ? 'Commencer'
-                  : 'Suivant'),
+              child: Text(
+                _currentIndex == _pages.length - 1 ? 'Commencer' : 'Suivant',
+                style: TextStyle(color: Colors.green[700]),
+              ),
             ),
           ],
         ),
@@ -102,7 +111,21 @@ class _OnboardingData {
   _OnboardingData({
     required this.image,
     required this.title,
-    required this.description,
+/*************  ✨ Codeium Command ⭐  *************/
+  /// Returns a column of widgets that display the onboarding content given in
+  /// [data].
+  ///
+  /// The widgets are arranged in the following order:
+  ///
+  /// 1. An image loaded from the asset path given in [data.image].
+  /// 2. A large title text with bold font style, centered and given by
+  ///    [data.title].
+  /// 3. A smaller description text, centered and given by [data.description].
+  ///
+  /// The widgets are spaced vertically with [SizedBox] widgets and horizontally
+  /// with [Padding] widgets. The image is constrained to have a height of 300
+  /// logical pixels and its width is shrunk to fit the available space.
+/******  a97f2194-6f8f-46da-aea5-5868e72bf43d  *******/    required this.description,
   });
 }
 
@@ -115,16 +138,20 @@ class _OnboardingContent extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(
-          data.image,
-          height: 300,
-          fit: BoxFit.contain,
+        ClipOval(
+          child: Image.asset(
+            data.image,
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover,
+          ),
         ),
         const SizedBox(height: 24),
         Text(
           data.title,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                color: Colors.green[700],
               ),
           textAlign: TextAlign.center,
         ),
