@@ -3,12 +3,12 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
-const authRoutes = require("./routes/auth.routes");
-const productRoutes = require("./routes/product.routes");
-const orderRoutes = require("./routes/order.routes");
-const userRoutes = require("./routes/user.routes");
+const authRoutes = require("./routes/auth");
+// const productRoutes = require("./routes/product");
+// const orderRoutes = require("./routes/order");
+// const userRoutes = require("./routes/user");
 
-const errorMiddleware = require("./middlewares/error.middleware");
+// const errorMiddleware = require("./middlewares/error.middleware");
 
 const app = express();
 
@@ -20,11 +20,11 @@ app.use(morgan("dev")); // Logger
 
 // 📌 Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/products", productRoutes);
-app.use("/api/orders", orderRoutes);
-app.use("/api/users", userRoutes);
+// app.use("/api/products", productRoutes);
+// app.use("/api/orders", orderRoutes);
+// app.use("/api/users", userRoutes);
 
 // 🛑 Error Handling Middleware
-app.use(errorMiddleware);
+// app.use(errorMiddleware);
 
 module.exports = app;
