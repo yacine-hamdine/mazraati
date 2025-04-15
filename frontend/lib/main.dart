@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/features/home/data/repositories/home_repository.dart';
 
 // Core
 import './config/app_theme.dart';
@@ -12,6 +13,12 @@ import './features/auth/data/repositories/auth_repository.dart';
 import './features/auth/logic/auth_bloc.dart';
 import './features/auth/presentation/auth_page.dart';
 
+// Home
+import './features/home/data/repositories/home_repository.dart';
+import './features/home/logic/home_bloc.dart';
+import './features/home/logic/home_event.dart';
+import './features/home/presentation/home_page.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -22,6 +29,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authRepository = AuthRepository();
+    final homeRepository = HomeRepository();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -34,7 +42,10 @@ class MyApp extends StatelessWidget {
               create: (context) => AuthBloc(authRepository: authRepository),
               child: const AuthPage(),
             ),
-        // '/home': (context) => const HomePage(),
+        '/home': (context) => BlocProvider(
+              create: (context) => HomeBloc(homeRepository: homeRepository)..add(LoadHome()),
+              child: const HomePage(),
+            ),
       },
     );
   }

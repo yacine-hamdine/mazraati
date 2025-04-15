@@ -7,12 +7,12 @@ class CustomTextField extends StatelessWidget {
   final IconData? prefixIcon;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.labelText,
     this.obscureText = false,
     this.prefixIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +24,7 @@ class CustomTextField extends StatelessWidget {
         labelText: labelText,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Colors.grey),
         ),
       ),
     );

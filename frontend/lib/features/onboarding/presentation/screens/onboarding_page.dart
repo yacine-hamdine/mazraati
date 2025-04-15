@@ -1,170 +1,129 @@
 import 'package:flutter/material.dart';
+import '../widgets/intro_page_view.dart';
+import '../widgets/next_button.dart';
+import '../widgets/page_indicator.dart';
 
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({Key? key}) : super(key: key);
+  const OnboardingPage({super.key});
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
+final PageController _pageController = PageController();
+  int _currentPage = 0;
 
-  final List<_OnboardingData> _pages = [
-    _OnboardingData(
-      image: 'assets/images/onboarding_1.jpg',
-      title: 'Achetez vos Produits Frais',
-      description: 'Accédez aux produits locaux directement auprès des agriculteurs.',
-    ),
-    _OnboardingData(
-      image: 'assets/images/onboarding_2.jpg',
-      title: 'Soutenez les Agriculteurs',
-      description: 'Encouragez et conservez nos agriculteurs et le terroir local.',
-    ),
-    _OnboardingData(
-      image: 'assets/images/onboarding_3.jpg',
-      title: 'Commandez Facilement',
-      description: 'Profitez de prix abordables et d’une livraison rapide.',
-    ),
+  final List<Map<String, String>> _pages = [
+    {
+      'image': 'assets/images/onboarding_1.jpg',
+      'text': 'Achetez des Produits Frais Directement des Agriculteurs Locaux à Votre Porte.',
+    },
+    {
+      'image': 'assets/images/onboarding_2.jpg',
+      'text': 'Découvrez et Commandez des Produits Agricoles Frais en Toute Simplicité.',
+    },
+    {
+      'image': 'assets/images/onboarding_3.jpg',
+      'text': 'Connectez-vous aux Agriculteurs pour des Produits Frais et Locaux.',
+    },
   ];
+
+  void _skipIntro() {
+    Navigator.of(context).pushReplacementNamed('/auth'); 
+  }
+
+  void _nextPage() {
+    if (_currentPage < _pages.length - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeIn,
+      );
+    } else {
+      _skipIntro();
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      backgroundColor: Colors.white,
+      body: Stack(
         children: [
-          const SizedBox(height: 50),
-          // App Logo
-          Image.asset(
-            'assets/images/logo.png',
-            height: 80,
-            fit: BoxFit.contain,
+          Column(
+            children: [
+              // Custom AppBar
+              Container(
+                height: 100,
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 100, height: 100), // Placeholder for alignment
+                    TextButton(
+                      onPressed: _skipIntro,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10.0),
+                        backgroundColor: const Color(0xFFE6EAFF),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100),
+                        ),
+                      ),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(
+                          color: Color(0xFF283891),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Page View
+              Expanded(
+                child: IntroPageView(
+                  pageController: _pageController,
+                  pages: _pages,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPage = index;
+                    });
+                  },
+                ),
+              ),
+              PageIndicator(
+                currentPage: _currentPage,
+                totalPages: _pages.length,
+              ),
+              const SizedBox(height: 20),
+              NextButton(onPressed: _nextPage), // Changed to _nextPage
+              const SizedBox(height: 20),
+            ],
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() => _currentIndex = index);
-              },
-              itemCount: _pages.length,
-              itemBuilder: (context, index) {
-                return _OnboardingContent(data: _pages[index]);
-              },
+          // Logo at the top
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 150,
+                height: 150,
+              ),
             ),
           ),
         ],
       ),
-      bottomSheet: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        height: 100,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            TextButton(
-              onPressed: () => _pageController.jumpToPage(_pages.length - 1),
-              child: Text('Passer', style: TextStyle(color: Colors.green[700])),
-            ),
-            Row(
-              children: List.generate(_pages.length, (idx) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: _currentIndex == idx ? Colors.green[700] : Colors.grey,
-                    shape: BoxShape.circle,
-                  ),
-                );
-              }),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_currentIndex == _pages.length - 1) {
-                  Navigator.pushReplacementNamed(context, '/auth');
-                } else {
-                  _pageController.nextPage(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeIn,
-                  );
-                }
-              },
-              child: Text(
-                _currentIndex == _pages.length - 1 ? 'Commencer' : 'Suivant',
-                style: TextStyle(color: Colors.green[700]),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _OnboardingData {
-  final String image;
-  final String title;
-  final String description;
-
-  _OnboardingData({
-    required this.image,
-    required this.title,
-/*************  ✨ Codeium Command ⭐  *************/
-  /// Returns a column of widgets that display the onboarding content given in
-  /// [data].
-  ///
-  /// The widgets are arranged in the following order:
-  ///
-  /// 1. An image loaded from the asset path given in [data.image].
-  /// 2. A large title text with bold font style, centered and given by
-  ///    [data.title].
-  /// 3. A smaller description text, centered and given by [data.description].
-  ///
-  /// The widgets are spaced vertically with [SizedBox] widgets and horizontally
-  /// with [Padding] widgets. The image is constrained to have a height of 300
-  /// logical pixels and its width is shrunk to fit the available space.
-/******  a97f2194-6f8f-46da-aea5-5868e72bf43d  *******/    required this.description,
-  });
-}
-
-class _OnboardingContent extends StatelessWidget {
-  final _OnboardingData data;
-  const _OnboardingContent({Key? key, required this.data}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        ClipOval(
-          child: Image.asset(
-            data.image,
-            width: 200,
-            height: 200,
-            fit: BoxFit.cover,
-          ),
-        ),
-        const SizedBox(height: 24),
-        Text(
-          data.title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Colors.green[700],
-              ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Text(
-            data.description,
-            style: Theme.of(context).textTheme.bodyMedium,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
     );
   }
 }

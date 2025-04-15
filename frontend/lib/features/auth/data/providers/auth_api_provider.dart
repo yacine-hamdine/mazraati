@@ -23,7 +23,8 @@ class AuthApiProvider {
       );
       // Assuming your backend returns user data under response.data['user']
       return UserModel.fromJson(response.data['user']);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
+      print(e);
       // You can customize error handling here
       throw Exception(e.response?.data['message'] ?? 'Register error');
     }
@@ -43,7 +44,7 @@ class AuthApiProvider {
       );
       // Assuming your backend returns user data under response.data['user']
       return UserModel.fromJson(response.data['user']);
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       throw Exception(e.response?.data['message'] ?? 'Login error');
     }
   }
