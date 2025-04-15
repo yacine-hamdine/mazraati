@@ -1,23 +1,32 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'home_event.dart';
-import 'home_state.dart';
-import '../data/repositories/home_repository.dart';
+import 'package:frontend/features/home/data/repositories/home_repository.dart';
+import 'package:frontend/features/home/logic/home_event.dart';
+import 'package:frontend/features/home/logic/home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  final HomeRepository? homeRepository;
+  final HomeRepository repository;
 
-  HomeBloc({this.homeRepository}) : super(HomeLoading()) {
-    on<LoadHome>(_onLoadData);
+  HomeBloc({required this.repository}) : super(HomeInitial()) {
+    on<LoadAllProducts>(_onLoadAllProducts);
+    on<LoadDiscountedProducts>(_onLoadDiscountedProducts);
+
+    on<HomeEvent>((event, emit) async {
+      if (event is LoadAllProducts || event is LoadDiscountedProducts) {
+        emit(HomeLoading());
+        try {
+          final all = await repository.getAllProducts();
+          final discounts = await repository.getDiscountedProducts();
+          emit(HomeLoaded(allProducts: all, discountedProducts: discounts));
+        } catch (e) {
+          emit(HomeError(e.toString()));
+        }
+      }
+    });
   }
 
-  void _onLoadData(LoadHome event, Emitter<HomeState> emit) async {
-    emit(HomeLoading());
-    try {
-      final banners = await homeRepository!.getBanners();
-      final products = await homeRepository!.getProducts();
-      emit(HomeLoaded(banners: banners, products: products));
-    } catch (e) {
-      emit(HomeError('Erreur lors du chargement des données'));
-    }
-  }
+  Future<void> _onLoadAllProducts(
+      LoadAllProducts event, Emitter<HomeState> emit) async {}
+
+  Future<void> _onLoadDiscountedProducts(
+      LoadDiscountedProducts event, Emitter<HomeState> emit) async {}
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:frontend/features/home/data/repositories/home_repository.dart';
 
 // Core
 import './config/app_theme.dart';
@@ -15,9 +14,10 @@ import './features/auth/presentation/auth_page.dart';
 
 // Home
 import './features/home/data/repositories/home_repository.dart';
+import './features/home/data/providers/home_api_provider.dart';
 import './features/home/logic/home_bloc.dart';
 import './features/home/logic/home_event.dart';
-import './features/home/presentation/home_page.dart';
+import './features/home/presentation/screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,28 +25,35 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     final authRepository = AuthRepository();
-    final homeRepository = HomeRepository();
+    final apiProvider = HomeApiProvider();
+    final homeRepository = HomeRepository(apiProvider: apiProvider);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Mazraati Marketplace',
-      theme: AppTheme.lightTheme,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const OnboardingPage(),
-        '/auth': (context) => BlocProvider(
-              create: (context) => AuthBloc(authRepository: authRepository),
-              child: const AuthPage(),
-            ),
-        '/home': (context) => BlocProvider(
-              create: (context) => HomeBloc(homeRepository: homeRepository)..add(LoadHome()),
-              child: const HomePage(),
-            ),
-      },
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AuthRepository>(create: (_) => authRepository),
+        RepositoryProvider<HomeRepository>(create: (_) => homeRepository),
+      ],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Mazraati Marketplace',
+        theme: AppTheme.lightTheme,
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const OnboardingPage(),
+          '/auth': (context) => BlocProvider(
+                create: (context) => AuthBloc(authRepository: authRepository),
+                child: const AuthPage(),
+              ),
+          '/home': (context) => BlocProvider(
+                create: (context) => HomeBloc(repository: homeRepository),
+                child: const HomeScreen(),
+              ),
+        },
+      ),
     );
   }
 }

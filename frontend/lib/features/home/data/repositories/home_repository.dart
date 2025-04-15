@@ -2,10 +2,15 @@ import '../models/product_model.dart';
 import '../providers/home_api_provider.dart';
 
 class HomeRepository {
-  final _provider = HomeApiProvider();
-  final homeRepository = HomeRepository();
+  final HomeApiProvider apiProvider;
 
-  Future<List<Product>> getProducts() => _provider.fetchAllProducts();
-  Future<List<Product>> getBanners() => _provider.fetchDiscountedProducts();
-  
+  HomeRepository({required this.apiProvider});
+
+  Future<List<Product>> getAllProducts() {
+    return apiProvider.fetchAllProducts();
+  }
+
+  Future<List<Product>> getDiscountedProducts() {
+    return apiProvider.fetchDiscountedProducts();
+  }
 }

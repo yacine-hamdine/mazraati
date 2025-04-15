@@ -1,4 +1,12 @@
+import 'package:equatable/equatable.dart';
 
-abstract class HomeEvent {}
+abstract class HomeEvent extends Equatable {
+  const HomeEvent();
 
-class LoadHome extends HomeEvent {}
+  @override
+  List<Object> get props => [];
+}
+
+class LoadAllProducts extends HomeEvent {}
+
+class LoadDiscountedProducts extends HomeEvent {}

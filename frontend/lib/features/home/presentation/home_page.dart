@@ -34,14 +34,13 @@ class HomePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // SearchField(),
-                  BannerSlider(banners: state.banners),
+                  BannerSlider(banners: state.discountedProducts),
                   const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text('Produits disponibles',
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.bold)),
                   ),
-                  ...state.filteredProducts.map((p) => ProductCard(product: p)),
                 ],
               ),
             );
