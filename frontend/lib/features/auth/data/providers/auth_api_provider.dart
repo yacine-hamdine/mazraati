@@ -21,7 +21,7 @@ class AuthApiProvider {
           'password': password,
         },
       );
-      // Assuming your backend returns user data under response.data['user']
+
       return UserModel.fromJson(response.data['user']);
     } on DioException catch (e) {
       print(e);
