@@ -2,21 +2,7 @@ const Product = require('../models/Product');
 
 exports.fetchProducts = async () => {
   const products = await Product.find({});
-  return products.map(product => {
-    const { _id, category, name, sellers } = product;
-    const seller = sellers[0]; // You can adapt this if needed
-    const { image, price, stock, discounts } = seller;
-
-    return {
-      id: _id,
-      category,
-      name,
-      image,
-      price,
-      stock,
-      discounts: discounts ? discounts.percentage : null
-    };
-  });
+  return products;
 };
 
 exports.createProduct = async (user, name, category, image, price, stock, discounts) => {

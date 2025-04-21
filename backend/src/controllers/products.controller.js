@@ -1,7 +1,7 @@
 const { fetchProducts, createProduct, updateProduct, removeProduct } = require('../services/products.service');
 
 // Fetching All Products
-exports.getProducts = async (res) => {
+exports.getProducts = async (req, res) => {
     try {
       const result = await fetchProducts();
       res.status(200).json(result);

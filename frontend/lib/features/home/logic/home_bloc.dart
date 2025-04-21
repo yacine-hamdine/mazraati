@@ -16,6 +16,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         try {
           final all = await repository.getAllProducts();
           final discounts = await repository.getDiscountedProducts();
+          print(all);
+          print(discounts);
           emit(HomeLoaded(allProducts: all, discountedProducts: discounts));
         } catch (e) {
           emit(HomeError(e.toString()));

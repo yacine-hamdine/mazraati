@@ -43,7 +43,7 @@ class AuthApiProvider {
         },
       );
       // Assuming your backend returns user data under response.data['user']
-      return UserModel.fromJson(response.data['user']);
+      return UserModel.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception(e.response?.data['message'] ?? 'Login error');
     }

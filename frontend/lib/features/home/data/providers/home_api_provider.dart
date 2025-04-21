@@ -8,7 +8,7 @@ class HomeApiProvider {
 
    Future<List<Product>> fetchAllProducts() async {
     final res = await dio.get(Endpoints.products);
-    final data = res.data as List;
+    final data = res.data;
     return data.map((json) => Product.fromJson(json)).toList();
   }
 

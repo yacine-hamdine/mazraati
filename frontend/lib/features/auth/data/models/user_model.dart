@@ -8,6 +8,7 @@ class UserModel {
   final String? location;
   final String? photo;
   final List<String?>? favorites;
+  final String? token;
 
 
   UserModel({
@@ -20,6 +21,7 @@ class UserModel {
     this.location,
     this.photo,
     this.favorites,
+    this.token,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class UserModel {
       favorites: json['favorites'] != null
           ? List<String?>.from(json['favorites'].map((x) => x))
           : [], 
+      token: json['token']?? '',
     );
   }
 
@@ -51,7 +54,7 @@ class UserModel {
       'favorites': favorites != null
           ? List<dynamic>.from(favorites!.map((x) => x))
           : [],
-          
+      'token': token,
     };
   }
 }

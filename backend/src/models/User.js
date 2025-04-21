@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, default: '' },
   location: { type: String, default: '' },
   favorites: { type: [String], default: [] },
+  token: { type: String, default: ''  },
   createdAt: { type: Date, default: Date.now }
 });
 
