@@ -1,49 +1,49 @@
 const mongoose = require('mongoose');
 
-const categories = ['vegetables', 'fruits', 'grains', 'dairy', 'meat', 'poultry', 'eggs', 'honey', 'nuts', 'herbs', 'plants', 'beverages', 'baked', 'oils'];
+const categories = ['legumes', 'fruits', 'cereales', 'produits_laitiers', 'viande', 'volaille', 'oeufs', 'miel', 'noix', 'herbes', 'plantes', 'boissons', 'produits_de_boulangerie', 'huiles'];
 
 const products = [
-    // Vegetables
-    'tomatoes', 'potatoes', 'onions', 'carrots', 'cucumbers', 'lettuce', 'spinach', 'broccoli', 'peppers', 'zucchini',
+    // Legumes
+    'tomates', 'pommes_de_terre', 'oignons', 'carottes', 'concombres', 'laitue', 'epinards', 'brocoli', 'poivrons', 'courgettes',
   
     // Fruits
-    'apples', 'oranges', 'bananas', 'grapes', 'pears', 'strawberries', 'blueberries', 'lemons', 'mangoes', 'watermelons',
+    'pommes', 'oranges', 'bananes', 'raisins', 'poires', 'fraises', 'myrtilles', 'citrons', 'mangues', 'pasteques',
   
-    // Grains
-    'wheat', 'barley', 'corn', 'rice', 'oats',
+    // Cereales
+    'ble', 'orge', 'mais', 'riz', 'avoine',
   
-    // Dairy
-    'milk', 'cheese', 'butter', 'yogurt',
+    // Produits Laitiers
+    'lait', 'fromage', 'beurre', 'yaourt',
   
-    // Meat
-    'beef', 'lamb', 'goat', 'camel',
+    // Viande
+    'boeuf', 'agneau', 'chevre', 'chameau',
   
-    // Poultry
-    'chicken', 'duck', 'turkey',
+    // Volaille
+    'poulet', 'canard', 'dinde',
   
-    // Eggs
-    'chicken_eggs', 'duck_eggs',
+    // oeufs
+    'oeufs_de_poule', 'oeufs_de_canard',
   
-    // Honey
-    'wild_honey', 'organic_honey', 'beeswax',
+    // Miel
+    'miel_sauvage', 'miel_bio', 'cire_d_abeille',
   
-    // Nuts
-    'almonds', 'walnuts', 'peanuts', 'pistachios',
+    // Noix
+    'amandes', 'noix', 'cacahuetes', 'pistaches',
   
-    // Herbs
-    'mint', 'parsley', 'basil', 'oregano', 'thyme',
+    // Herbes
+    'menthe', 'persil', 'basilic', 'origan', 'thym',
   
-    // Plants
-    'succulents', 'basil_plants', 'tomato_seedlings', 'aloe_vera',
+    // Plantes
+    'succulentes', 'plants_de_basilic', 'plants_de_tomates', 'aloe_vera',
   
-    // Beverages
-    'milk_tea', 'herbal_tea', 'fresh_juice',
+    // Boissons
+    'the_au_lait', 'tisane', 'jus_frais',
   
-    // Baked
-    'bread', 'pastries', 'cakes',
+    // Produits de Boulangerie
+    'pain', 'patisseries', 'gateaux',
   
-    // Oils
-    'olive_oil', 'sunflower_oil', 'argan_oil'
+    // Huiles
+    'huile_d_olive', 'huile_de_tournesol', 'huile_d_argan'
 ];
 
 const productSchema = new mongoose.Schema({

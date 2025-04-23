@@ -1,113 +1,109 @@
-// ... existing code ...
-
 enum ProductCategory {
-  vegetables,
-  fruits,
-  grains,
-  dairy,
-  meat,
-  poultry,
-  eggs,
-  honey,
-  nuts,
-  herbs,
-  plants,
-  beverages,
-  baked,
-  oils,
+  legumes, // vegetables
+  fruits, // fruits
+  cereales, // grains
+  produits_laitiers, // dairy
+  viande, // meat
+  volaille, // poultry
+  oeufs, // eggs
+  miel, // honey
+  noix, // nuts
+  herbes, // herbs
+  plantes, // plants
+  boissons, // beverages
+  produits_de_boulangerie, // baked
+  huiles, // oils
 }
 
 enum ProductName {
-  // Vegetables
-  tomatoes,
-  potatoes,
-  onions,
-  carrots,
-  cucumbers,
-  lettuce,
-  spinach,
-  broccoli,
-  peppers,
-  zucchini,
+  // Legumes
+  tomates, // tomatoes
+  pommes_de_terre, // potatoes
+  oignons, // onions
+  carottes, // carrots
+  concombres, // cucumbers
+  laitue, // lettuce
+  epinards, // spinach
+  brocoli, // broccoli
+  poivrons, // peppers
+  courgettes, // zucchini
 
   // Fruits
-  apples,
-  oranges,
-  bananas,
-  grapes,
-  pears,
-  strawberries,
-  blueberries,
-  lemons,
-  mangoes,
-  watermelons,
+  pommes, // apples
+  oranges, // oranges
+  bananes, // bananas
+  raisins, // grapes
+  poires, // pears
+  fraises, // strawberries
+  myrtilles, // blueberries
+  citrons, // lemons
+  mangues, // mangoes
+  pasteques, // watermelons
 
-  // Grains
-  wheat,
-  barley,
-  corn,
-  rice,
-  oats,
+  // Cereales
+  ble, // wheat
+  orge, // barley
+  mais, // corn
+  riz, // rice
+  avoine, // oats
 
-  // Dairy
-  milk,
-  cheese,
-  butter,
-  yogurt,
+  // Produits Laitiers
+  lait, // milk
+  fromage, // cheese
+  beurre, // butter
+  yaourt, // yogurt
 
-  // Meat
-  beef,
-  lamb,
-  goat,
-  camel,
+  // Viande
+  boeuf, // beef
+  agneau, // lamb
+  chevre, // goat
+  chameau, // camel
 
-  // Poultry
-  chicken,
-  duck,
-  turkey,
+  // Volaille
+  poulet, // chicken
+  canard, // duck
+  dinde, // turkey
 
-  // Eggs
-  chicken_eggs,
-  duck_eggs,
+  // oeuffs
+  oeufs_de_poule, // chicken_eggs
+  oeufs_de_canard, // duck_eggs
 
-  // Honey
-  wild_honey,
-  organic_honey,
-  beeswax,
+  // Miel
+  miel_sauvage, // wild_honey
+  miel_bio, // organic_honey
+  cire_d_abeille, // beeswax
 
-  // Nuts
-  almonds,
-  walnuts,
-  peanuts,
-  pistachios,
+  // Noix
+  amandes, // almonds
+  noix, // walnuts
+  cacahuetes, // peanuts
+  pistaches, // pistachios
 
-  // Herbs
-  mint,
-  parsley,
-  basil,
-  oregano,
-  thyme,
+  // Herbes
+  menthe, // mint
+  persil, // parsley
+  basilic, // basil
+  origan, // oregano
+  thym, // thyme
 
-  // Plants
-  succulents,
-  basil_plants,
-  tomato_seedlings,
-  aloe_vera,
+  // Plantes
+  succulentes, // succulents
+  plants_de_basilic, // basil_plants
+  plants_de_tomates, // tomato_seedlings
+  aloe_vera, // aloe_vera
 
-  // Beverages
-  milk_tea,
-  herbal_tea,
-  fresh_juice,
+  // Boissons
+  the_au_lait, // milk_tea
+  tisane, // herbal_tea
+  jus_frais, // fresh_juice
 
-  // Baked
-  bread,
-  pastries,
-  cakes,
+  // Produits de Boulangerie
+  pain, // bread
+  patisseries, // pastries
+  gateaux, // cakes
 
-  // Oils
-  olive_oil,
-  sunflower_oil,
-  argan_oil,
+  // Huiles
+  huile_d_olive, // olive_oil
+  huile_de_tournesol, // sunflower_oil
+  huile_d_argan, // argan_oil
 }
-
-// ... existing code ...

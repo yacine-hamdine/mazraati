@@ -20,6 +20,9 @@ class _StoreScreenState extends State<StoreScreen> {
   bool editing = false;
   String? error;
 
+  // Add this to store the current userId
+  String? currentUserId;
+
   // Add product controllers
   final TextEditingController nameController = TextEditingController();
   final TextEditingController stockController = TextEditingController();
@@ -44,7 +47,11 @@ class _StoreScreenState extends State<StoreScreen> {
       final user = await ApiService.getUserProfile();
       final allProducts = await ApiService.getProducts();
       final userId = user['_id'] ?? user['id'];
-      myProducts = allProducts.where((p) => p['seller']?['_id'] == userId).toList();
+      currentUserId = userId; // Store userId in state
+      myProducts = allProducts.where((p) {
+        final sellers = p['sellers'] as List<dynamic>? ?? [];
+        return sellers.any((seller) => seller['_id'] == userId);
+      }).toList();
       setState(() {
         loading = false;
       });
@@ -73,97 +80,97 @@ class _StoreScreenState extends State<StoreScreen> {
     if (productName == null) return null;
     // Map each ProductName to its ProductCategory
     switch (productName) {
-      // Vegetables
-      case ProductName.tomatoes:
-      case ProductName.potatoes:
-      case ProductName.onions:
-      case ProductName.carrots:
-      case ProductName.cucumbers:
-      case ProductName.lettuce:
-      case ProductName.spinach:
-      case ProductName.broccoli:
-      case ProductName.peppers:
-      case ProductName.zucchini:
-        return ProductCategory.vegetables;
+      // Légumes
+      case ProductName.tomates:
+      case ProductName.pommes_de_terre:
+      case ProductName.oignons:
+      case ProductName.carottes:
+      case ProductName.concombres:
+      case ProductName.laitue:
+      case ProductName.epinards:
+      case ProductName.brocoli:
+      case ProductName.poivrons:
+      case ProductName.courgettes:
+        return ProductCategory.legumes;
       // Fruits
-      case ProductName.apples:
+      case ProductName.pommes:
       case ProductName.oranges:
-      case ProductName.bananas:
-      case ProductName.grapes:
-      case ProductName.pears:
-      case ProductName.strawberries:
-      case ProductName.blueberries:
-      case ProductName.lemons:
-      case ProductName.mangoes:
-      case ProductName.watermelons:
+      case ProductName.bananes:
+      case ProductName.raisins:
+      case ProductName.poires:
+      case ProductName.fraises:
+      case ProductName.myrtilles:
+      case ProductName.citrons:
+      case ProductName.mangues:
+      case ProductName.pasteques:
         return ProductCategory.fruits;
-      // Grains
-      case ProductName.wheat:
-      case ProductName.barley:
-      case ProductName.corn:
-      case ProductName.rice:
-      case ProductName.oats:
-        return ProductCategory.grains;
-      // Dairy
-      case ProductName.milk:
-      case ProductName.cheese:
-      case ProductName.butter:
-      case ProductName.yogurt:
-        return ProductCategory.dairy;
-      // Meat
-      case ProductName.beef:
-      case ProductName.lamb:
-      case ProductName.goat:
-      case ProductName.camel:
-        return ProductCategory.meat;
-      // Poultry
-      case ProductName.chicken:
-      case ProductName.duck:
-      case ProductName.turkey:
-        return ProductCategory.poultry;
-      // Eggs
-      case ProductName.chicken_eggs:
-      case ProductName.duck_eggs:
-        return ProductCategory.eggs;
-      // Honey
-      case ProductName.wild_honey:
-      case ProductName.organic_honey:
-      case ProductName.beeswax:
-        return ProductCategory.honey;
-      // Nuts
-      case ProductName.almonds:
-      case ProductName.walnuts:
-      case ProductName.peanuts:
-      case ProductName.pistachios:
-        return ProductCategory.nuts;
-      // Herbs
-      case ProductName.mint:
-      case ProductName.parsley:
-      case ProductName.basil:
-      case ProductName.oregano:
-      case ProductName.thyme:
-        return ProductCategory.herbs;
-      // Plants
-      case ProductName.succulents:
-      case ProductName.basil_plants:
-      case ProductName.tomato_seedlings:
+      // Céréales
+      case ProductName.ble:
+      case ProductName.orge:
+      case ProductName.mais:
+      case ProductName.riz:
+      case ProductName.avoine:
+        return ProductCategory.cereales;
+      // Produits Laitiers
+      case ProductName.lait:
+      case ProductName.fromage:
+      case ProductName.beurre:
+      case ProductName.yaourt:
+        return ProductCategory.produits_laitiers;
+      // Viande
+      case ProductName.boeuf:
+      case ProductName.agneau:
+      case ProductName.chevre:
+      case ProductName.chameau:
+        return ProductCategory.viande;
+      // Volaille
+      case ProductName.poulet:
+      case ProductName.canard:
+      case ProductName.dinde:
+        return ProductCategory.volaille;
+      // Œufs
+      case ProductName.oeufs_de_poule:
+      case ProductName.oeufs_de_canard:
+        return ProductCategory.oeufs;
+      // Miel
+      case ProductName.miel_sauvage:
+      case ProductName.miel_bio:
+      case ProductName.cire_d_abeille:
+        return ProductCategory.miel;
+      // Noix
+      case ProductName.amandes:
+      case ProductName.noix:
+      case ProductName.cacahuetes:
+      case ProductName.pistaches:
+        return ProductCategory.noix;
+      // Herbes
+      case ProductName.menthe:
+      case ProductName.persil:
+      case ProductName.basilic:
+      case ProductName.origan:
+      case ProductName.thym:
+        return ProductCategory.herbes;
+      // Plantes
+      case ProductName.succulentes:
+      case ProductName.plants_de_basilic:
+      case ProductName.plants_de_tomates:
       case ProductName.aloe_vera:
-        return ProductCategory.plants;
-      // Beverages
-      case ProductName.milk_tea:
-      case ProductName.herbal_tea:
-      case ProductName.fresh_juice:
-        return ProductCategory.beverages;
-      // Baked
-      case ProductName.bread:
-      case ProductName.pastries:
-      case ProductName.cakes:
-        return ProductCategory.baked;
-      // Oils
-      case ProductName.olive_oil:
-      case ProductName.sunflower_oil:
-      case ProductName.argan_oil:
-        return ProductCategory.oils;
+        return ProductCategory.plantes;
+      // Boissons
+      case ProductName.the_au_lait:
+      case ProductName.tisane:
+      case ProductName.jus_frais:
+        return ProductCategory.boissons;
+      // Produits de Boulangerie
+      case ProductName.pain:
+      case ProductName.patisseries:
+      case ProductName.gateaux:
+        return ProductCategory.produits_de_boulangerie;
+      // Huiles
+      case ProductName.huile_d_olive:
+      case ProductName.huile_de_tournesol:
+      case ProductName.huile_d_argan:
+        return ProductCategory.huiles;
       default:
         return null;
     }
@@ -219,19 +226,32 @@ class _StoreScreenState extends State<StoreScreen> {
   }
 
   void showEditProductSheet(dynamic product) {
-    final TextEditingController editStock = TextEditingController(text: product['stock'].toString());
-    final TextEditingController editPrice = TextEditingController(text: product['price'].toString());
+    final sellers = product['sellers'] as List<dynamic>? ?? [];
+    final mySeller = sellers.firstWhere(
+      (seller) => seller['_id'] == currentUserId,
+      orElse: () => null,
+    );
+  
+    if (mySeller == null) {
+      setState(() {
+        error = "Seller not found for this product.";
+      });
+      return;
+    }
+  
+    final TextEditingController editStock = TextEditingController(text: mySeller['stock'].toString());
+    final TextEditingController editPrice = TextEditingController(text: mySeller['price'].toString());
     Uint8List? editImageBytes;
-    String? editImageBase64 = product['image'];
+    String? editImageBase64 = mySeller['image'];
     ProductName? editProductName = ProductName.values.firstWhere(
       (p) => p.name == (product['name'] ?? ''),
-      orElse: () => ProductName.tomatoes,
+      orElse: () => ProductName.tomates,
     );
-    double? editDiscountPercentage = product['discounts']?['percentage']?.toDouble();
-    DateTime? editDiscountExpiry = product['discounts']?['expiresAt'] != null
-        ? DateTime.tryParse(product['discounts']['expiresAt'])
+    double? editDiscountPercentage = mySeller['discounts']?['percentage']?.toDouble();
+    DateTime? editDiscountExpiry = mySeller['discounts']?['expiresAt'] != null
+        ? DateTime.tryParse(mySeller['discounts']['expiresAt'])
         : null;
-
+  
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -320,7 +340,7 @@ class _StoreScreenState extends State<StoreScreen> {
                       labelText: "Saisissez le prix du KG en DZA",
                       suffix: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        child: const Text("KG", style: TextStyle(color: Color(0xFF00826C))),
+                        child: const Text("DZA", style: TextStyle(color: Color(0xFF00826C))),
                       ),
                     ),
                   ),
@@ -378,15 +398,9 @@ class _StoreScreenState extends State<StoreScreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.save),
-                    label: const Text("Enregistrer"),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00826C),
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                    onPressed: () async {
+                  CustomMainButton(
+                    text: "Enregistrer",
+                    onPressed: adding ? null : () async {
                       setState(() {
                         editing = true;
                       });
@@ -474,6 +488,15 @@ class _StoreScreenState extends State<StoreScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const Text(
+                        "Publier un produit",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      const Text(
+                        "Mazraati Marketplace",
+                        style: TextStyle(color: Colors.black54, fontSize: 15),
+                      ),
+                      const SizedBox(height: 12),
                       GestureDetector(
                         onTap: pickProductImage,
                         child: Container(
@@ -496,21 +519,32 @@ class _StoreScreenState extends State<StoreScreen> {
                         ),
                       ),
                       const SizedBox(height: 18),
-                      const Text(
-                        "Information du produits",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                      ),
-                      const Text(
-                        "El fellah stock",
-                        style: TextStyle(color: Colors.black54, fontSize: 15),
-                      ),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: nameController,
+                      // Product name selection (enum)
+                      DropdownButtonFormField<ProductName>(
+                        value: selectedProductName,
+                        items: ProductName.values
+                            .map((p) => DropdownMenuItem(
+                                  value: p,
+                                  child: Text(p.name),
+                                ))
+                            .toList(),
+                        onChanged: (p) {
+                          setState(() {
+                            selectedProductName = p;
+                          });
+                        },
                         decoration: const InputDecoration(
                           labelText: "Nom du produit",
                           border: OutlineInputBorder(),
                         ),
+                      ),
+                      const SizedBox(height: 10),
+                      // Category display (inferred)
+                      Text(
+                        selectedProductName != null
+                            ? "Catégorie: ${getCategoryForProduct(selectedProductName)?.name ?? ''}"
+                            : "Catégorie: ",
+                        style: const TextStyle(color: Color(0xFF00826C), fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -556,7 +590,60 @@ class _StoreScreenState extends State<StoreScreen> {
                               color: const Color(0xFFF3F4F6),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text("KG", style: TextStyle(color: Color(0xFF00826C))),
+                            child: const Text("DZA", style: TextStyle(color: Color(0xFF00826C))),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      // Discount fields
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: discountPercentage?.toString() ?? '',
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                labelText: "Remise (%)",
+                                border: OutlineInputBorder(),
+                              ),
+                              onChanged: (val) {
+                                setState(() {
+                                  discountPercentage = double.tryParse(val);
+                                });
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: InkWell(
+                              onTap: () async {
+                                final picked = await showDatePicker(
+                                  context: context,
+                                  initialDate: discountExpiry ?? DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                                );
+                                if (picked != null) {
+                                  setState(() {
+                                    discountExpiry = picked;
+                                  });
+                                }
+                              },
+                              child: InputDecorator(
+                                decoration: const InputDecoration(
+                                  labelText: "Expire le",
+                                  border: OutlineInputBorder(),
+                                ),
+                                child: Text(
+                                  discountExpiry != null
+                                      ? "${discountExpiry!.toLocal()}".split(' ')[0]
+                                      : "Choisir une date",
+                                  style: TextStyle(
+                                    color: discountExpiry != null ? Colors.black : Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -584,29 +671,37 @@ class _StoreScreenState extends State<StoreScreen> {
                       const SizedBox(height: 12),
                       if (myProducts.isEmpty)
                         const Center(child: Text("Aucun produit dans votre boutique")),
-                      ...myProducts.map((product) => Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: product['image'] != null
-                                  ? ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Image.memory(
-                                        base64Decode(product['image'].replaceFirst(RegExp(r'data:image/[^;]+;base64,'), '')),
-                                        width: 48,
-                                        height: 48,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )
-                                  : const Icon(Icons.image, size: 48, color: Color(0xFF00826C)),
-                              title: Text(product['name'] ?? ''),
-                              subtitle: Text(
-                                  "Stock: ${product['stock']} KG\nPrix: ${product['price']} DZA/KG"),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.edit, color: Color(0xFF00826C)),
-                                onPressed: () => showEditProductSheet(product),
+                      ...myProducts.map((product) {
+                            final sellers = product['sellers'] as List<dynamic>? ?? [];
+                            final mySeller = sellers.firstWhere(
+                              (seller) => seller['_id'] == currentUserId,
+                              orElse: () => null,
+                            );
+                            final imageBase64 = mySeller != null ? mySeller['image'] : null;
+                            return Card(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: ListTile(
+                                leading: imageBase64 != null
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.memory(
+                                          base64Decode(imageBase64.replaceFirst(RegExp(r'data:image/[^;]+;base64,'), '')),
+                                          width: 48,
+                                          height: 48,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : const Icon(Icons.image, size: 48, color: Color(0xFF00826C)),
+                                title: Text(product['name'] ?? ''),
+                                subtitle: Text(
+                                    "Stock: ${mySeller != null ? mySeller['stock'] : '-'} KG\nPrix: ${mySeller != null ? mySeller['price'] : '-'} DZA/KG"),
+                                trailing: IconButton(
+                                  icon: const Icon(Icons.edit, color: Color(0xFF00826C)),
+                                  onPressed: () => showEditProductSheet(product),
+                                ),
                               ),
-                            ),
-                          )),
+                            );
+                          }),
                     ],
                   ),
                 ),
