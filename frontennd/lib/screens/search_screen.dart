@@ -262,9 +262,11 @@ class _ProductCard extends StatelessWidget {
                   style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  seller?['name'] ?? 'El fellah stock',
-                  style: const TextStyle(color: Colors.black54, fontSize: 13),
+                Expanded(
+                  child: Text(
+                    seller?['name'] ?? 'El fellah stock',
+                    style: const TextStyle(color: Colors.black54, fontSize: 13),
+                  )
                 ),
                 const Spacer(),
                 Row(

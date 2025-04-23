@@ -2,7 +2,9 @@ const {
     fetchUserProfile,
     updateUserProfileData,
     fetchUserAccount,
-    updateUserAccountData
+    updateUserAccountData,
+    fetchUserPreferences,
+    updateUserPreferencesData,
   } = require('../services/user.service');
   
   // Profile
@@ -43,3 +45,22 @@ const {
     }
   };
   
+
+  // Preferences
+  exports.getPreferences = async (req, res) => {
+    try {
+      const result = await fetchUserPreferences(req.user.id);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).json({ message: err.message || 'Server error' });
+    }
+  };
+  
+  exports.updatePreferences = async (req, res) => {
+    try {
+      const result = await updateUserPreferencesData(req.user.id, req.body);
+      res.status(200).json(result);
+    } catch (err) {
+      res.status(500).json({ message: err.message || 'Server error' });
+    }
+  };

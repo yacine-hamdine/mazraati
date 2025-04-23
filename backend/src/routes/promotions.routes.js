@@ -5,6 +5,6 @@ const validateRequest = require('../middlewares/validateRequest');
 const authMiddleware = require('../middlewares/auth.middleware');
 
 // Reading Promotion Offers
-router.get('/', getPromotions);
+router.get('/', validateRequest, authMiddleware, getPromotions);
 
 module.exports = router;

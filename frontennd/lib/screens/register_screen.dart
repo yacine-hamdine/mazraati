@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import 'login_screen.dart';
+import '../widgets/custom_textfield.dart';
+import '../widgets/custom_main_button.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -44,6 +46,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  bool isObscure = true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,28 +60,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 24),
             const Text('Créer un compte', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
-            TextField(
+            CustomTextField(
               controller: usernameController,
-              decoration: const InputDecoration(labelText: 'Nom d\'utilisateur'),
+              hintText: 'Nom d\'utilisateur',
             ),
             const SizedBox(height: 16),
-            TextField(
+            CustomTextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              hintText: 'Email',
             ),
             const SizedBox(height: 16),
-            TextField(
+            CustomTextField(
               controller: passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(labelText: 'Mot de passe'),
+              hintText: 'Mot de Passe',
+              obscureText: isObscure,
+              suffixIcon: Icon(isObscure ? Icons.visibility_off : Icons.visibility, color: Color(0xFFB6C2C9)),
+              onSuffixTap: () => setState(() => isObscure = !isObscure),
             ),
             const SizedBox(height: 16),
             if (message != null)
               Text(message!, style: const TextStyle(color: Colors.green)),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: loading ? null : registerUser,
-              child: loading ? const CircularProgressIndicator() : const Text("S'enregistrer"),
+            CustomMainButton(
+              text: 'S\'inscrire',
+              onPressed: loading? null : registerUser,
             ),
             const SizedBox(height: 16),
             GestureDetector(

@@ -144,6 +144,16 @@ class ApiService {
     return jsonDecode(res.body);
   }
 
+  static Future<Map<String, dynamic>> getUserPreferences() async {
+    final res = await _authorizedRequest('/user/preferences');
+    return jsonDecode(res.body);
+  }
+
+  static Future<Map<String, dynamic>> updateUserPreferences(Map<String, dynamic> data) async {
+    final res = await _authorizedRequest('/user/preferences', method: 'PUT', body: data);
+    return jsonDecode(res.body);
+  }
+
   // ---------- PROMOS ----------
   static Future<List<dynamic>> getPromotions() async {
     final res = await _authorizedRequest('/promotions');

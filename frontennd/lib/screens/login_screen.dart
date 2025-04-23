@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
           children: [
             Image.asset('assets/images/logo.png', height: 80), // replace with your logo
             const SizedBox(height: 24),
-            const Text('Sign in', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text('Se Connecter', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 24),
             CustomTextField(
               hintText: "Email ou numero de telephone",
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (_) => const RegisterScreen()),
                     );
                   },
-                  child: const Text('Sign Up', style: TextStyle(color: Colors.blue)),
+                  child: const Text('S\'inscire', style: TextStyle(color: Colors.blue)),
                 ),
               ],
             ),

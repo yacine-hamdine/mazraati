@@ -50,6 +50,7 @@ const productSchema = new mongoose.Schema({
     category: { type: String, enum: categories, required: true },
     name: { type: String, enum: products, required: true },
     sellers: [{
+        _id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         name: { type: String, required: true, default: '' },
         image: { type: String, default: '' },
         price: { type: Number, required: true },

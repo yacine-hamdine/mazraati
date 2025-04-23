@@ -2,19 +2,19 @@ const User = require('../models/User');
 
 // PROFILE SERVICE
 exports.fetchUserProfile = async (userId) => {
-  const user = await User.findById(userId).select('firstName lastName photo location');
+  const user = await User.findById(userId).select('firstName lastName photo');
   if (!user) throw new Error('User not found');
   return user;
 };
 
 exports.updateUserProfileData = async (userId, data) => {
-  const allowedFields = ['firstName', 'lastName', 'photo', 'location'];
+  const allowedFields = ['firstName', 'lastName', 'photo'];
   const updates = {};
   for (let key of allowedFields) {
     if (data[key] !== undefined) updates[key] = data[key];
   }
 
-  const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('firstName lastName photo location');
+  const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('firstName lastName photo');
   if (!user) throw new Error('User not found or update failed');
   return user;
 };
@@ -40,6 +40,26 @@ exports.updateUserAccountData = async (userId, data) => {
   }
 
   const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('email username');
+  if (!user) throw new Error('User not found or update failed');
+  return user;
+};
+
+
+// PREFERENCES SERVICE
+exports.fetchUserPreferences = async (userId) => {
+  const user = await User.findById(userId).select('location favorites');
+  if (!user) throw new Error('User not found');
+  return user;
+};
+
+exports.updateUserPreferencesData = async (userId, data) => {
+  const allowedFields = ['lcoation', 'favorites'];
+  const updates = {};
+  for (let key of allowedFields) {
+    if (data[key] !== undefined) updates[key] = data[key];
+  }
+
+  const user = await User.findByIdAndUpdate(userId, updates, { new: true, runValidators: true }).select('location favorites');
   if (!user) throw new Error('User not found or update failed');
   return user;
 };
