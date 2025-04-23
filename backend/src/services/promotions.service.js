@@ -21,6 +21,7 @@ const findPromotionalProducts = async () => {
                 category: product.category,
                 seller: {
                     _id: seller._id, // Include seller ID here
+                    name: seller.name,
                     price: seller.price,
                     image: seller.image,
                     stock: seller.stock,

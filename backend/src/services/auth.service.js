@@ -5,6 +5,7 @@ const { generateToken } = require("../utils/jwt");
 exports.register = async ({ username, email, password }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
+    
     const error = new Error('Email already in use');
     error.status = 400;
     throw error;

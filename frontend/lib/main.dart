@@ -17,7 +17,7 @@ import './features/home/data/repositories/home_repository.dart';
 import './features/home/data/providers/home_api_provider.dart';
 import './features/home/logic/home_bloc.dart';
 import './features/home/logic/home_event.dart';
-import './features/home/presentation/screens/home_screen.dart';
+import './features/home/presentation/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
               ),
           '/home': (context) => BlocProvider(
                 create: (context) => HomeBloc(repository: homeRepository),
-                child: const HomeScreen(),
+                child: const HomePage(),
               ),
         },
       ),

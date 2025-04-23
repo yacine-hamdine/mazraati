@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const User = require('../models/User'); // <-- Add this import
 
 exports.fetchProducts = async () => {
   const products = await Product.find({});
@@ -6,6 +7,10 @@ exports.fetchProducts = async () => {
 };
 
 exports.createProduct = async (user, name, category, image, price, stock, discounts) => {
+  // Fetch user info for name
+  const userDoc = await User.findById(user);
+  const sellerName = userDoc ? `${userDoc.firstName} ${userDoc.lastName}`.trim() : '';
+
   let product = await Product.findOne({ name, category });
 
   if (product) {
@@ -14,10 +19,24 @@ exports.createProduct = async (user, name, category, image, price, stock, discou
 
     if (sellerIndex !== -1) {
       // User already listed it – update the existing offer
-      product.sellers[sellerIndex] = { _id: user, image, price, stock, discounts };
+      product.sellers[sellerIndex] = { 
+        _id: user, 
+        name: sellerName, // <-- Add seller name here
+        image, 
+        price, 
+        stock, 
+        discounts 
+      };
     } else {
       // New seller – add to sellers array
-      product.sellers.push({ _id: user, image, price, stock, discounts });
+      product.sellers.push({ 
+        _id: user, 
+        name: sellerName, // <-- Add seller name here
+        image, 
+        price, 
+        stock, 
+        discounts 
+      });
     }
 
     await product.save();
@@ -28,6 +47,7 @@ exports.createProduct = async (user, name, category, image, price, stock, discou
       category,
       sellers: [{
         _id: user,
+        name: sellerName, // <-- Add seller name here
         image,
         price,
         stock,
@@ -44,6 +64,10 @@ exports.updateProduct = async (id, user, image, price, stock, discounts) => {
   const product = await Product.findById(id);
   if (!product) throw new Error('Product not found');
 
+  // Fetch user info for name
+  const userDoc = await User.findById(user);
+  const sellerName = userDoc ? `${userDoc.firstName} ${userDoc.lastName}`.trim() : '';
+
   const sellerIndex = product.sellers.findIndex(s => s._id.toString() === user);
   if (sellerIndex === -1) throw new Error('Seller offer not found for this product');
 
@@ -51,6 +75,7 @@ exports.updateProduct = async (id, user, image, price, stock, discounts) => {
   product.sellers[sellerIndex] = {
     ...product.sellers[sellerIndex],
     _id: user,
+    name: sellerName, // <-- Add seller name here
     image,
     price,
     stock,

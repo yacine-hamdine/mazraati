@@ -63,7 +63,6 @@ const productAccessMiddleware = async (req, res, next) => {
       return res.status(500).json({ message: 'Internal server error' });
     }
   }
-
   // If the method is not GET, PUT, or DELETE, you might want to deny it by default
   // or handle it in another middleware.  This depends on your application's requirements.
   return next(); //  Or, you could do:  res.status(405).json({ message: 'Method not allowed' });
