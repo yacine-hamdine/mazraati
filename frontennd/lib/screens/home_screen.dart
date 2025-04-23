@@ -22,17 +22,42 @@ class _HomeScreenState extends State<HomeScreen> {
   List<dynamic> promotions = [];
   bool promotionsLoading = true;
 
+  // Add state for user preferences (favorites)
+  Set<String> favoriteProductIds = {};
+  bool loadingPreferences = true;
+
   PageController? _pageController;
   Timer? _bannerTimer;
 
   @override
   void initState() {
     super.initState();
-    fetchProducts();
-    fetchPromotions();
+    // Fetch all data concurrently
+    _loadInitialData();
     _pageController = PageController(initialPage: 0);
     _startBannerAutoSlide();
   }
+
+  // Helper to load initial data
+  Future<void> _loadInitialData() async {
+    setState(() {
+      loading = true;
+      promotionsLoading = true;
+      loadingPreferences = true;
+    });
+    try {
+      // Fetch products, promotions, and preferences in parallel
+      await Future.wait([
+        fetchProducts(),
+        fetchPromotions(),
+        fetchPreferences(), // Fetch preferences
+      ]);
+    } finally {
+       // Ensure loading states are updated even if one fails
+       // Individual fetch methods handle their specific loading flags
+    }
+  }
+
 
   void _startBannerAutoSlide() {
     _bannerTimer?.cancel();
@@ -56,23 +81,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchProducts() async {
+     // Set loading specific to products if needed, or rely on global loading
+    // setState(() => loading = true);
     try {
       final result = await ApiService.getProducts();
-      setState(() {
-        products = result;
-        loading = false;
-      });
+      if (mounted) { // Check if the widget is still in the tree
+        setState(() {
+          products = result;
+          loading = false; // Products loaded
+        });
+      }
     } catch (e) {
-      setState(() {
-        loading = false;
-      });
+       if (mounted) {
+        setState(() {
+          loading = false; // Stop loading even on error
+        });
+       }
       debugPrint('Error fetching products: $e');
+       // Optionally show a SnackBar
+       // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur produits: $e')));
     }
   }
 
   List<Uint8List?> promotionImages = [];
 
   Future<void> fetchPromotions() async {
+    // setState(() => promotionsLoading = true);
     try {
       final result = await ApiService.getPromotions();
       // Decode images once and cache them
@@ -90,18 +124,95 @@ class _HomeScreenState extends State<HomeScreen> {
         return null;
       }).toList();
 
-      setState(() {
-        promotions = result;
-        promotionsLoading = false;
-        promotionImages = images;
-      });
+      if (mounted) {
+        setState(() {
+          promotions = result;
+          promotionsLoading = false; // Promotions loaded
+          promotionImages = images;
+        });
+      }
     } catch (e) {
-      setState(() {
-        promotionsLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          promotionsLoading = false; // Stop loading even on error
+        });
+      }
       debugPrint('Error fetching promotions: $e');
+      // Optionally show a SnackBar
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur promotions: $e')));
     }
   }
+
+  // Method to fetch user preferences (favorites)
+  Future<void> fetchPreferences() async {
+    // setState(() => loadingPreferences = true);
+    try {
+      final prefs = await ApiService.getUserPreferences();
+      if (mounted) {
+        setState(() {
+          // Ensure 'favorites' exists and is a list, default to empty list
+          final favs = prefs?['favorites'];
+          if (favs is List) {
+             // Convert list of dynamic (potentially IDs) to Set<String>
+            favoriteProductIds = Set<String>.from(favs.map((id) => id.toString()));
+          } else {
+            favoriteProductIds = {}; // Default to empty set if null or not a list
+          }
+          loadingPreferences = false; // Preferences loaded
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          loadingPreferences = false; // Stop loading even on error
+        });
+      }
+      debugPrint('Error fetching preferences: $e');
+      // Optionally show a SnackBar
+      // ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur préférences: $e')));
+    }
+  }
+
+  // Method to handle toggling a favorite
+  Future<void> _toggleFavorite(String productId) async {
+    final bool isCurrentlyFavorite = favoriteProductIds.contains(productId);
+    Set<String> updatedFavorites = Set<String>.from(favoriteProductIds);
+
+    if (isCurrentlyFavorite) {
+      updatedFavorites.remove(productId);
+    } else {
+      updatedFavorites.add(productId);
+    }
+
+    // Optimistically update the UI first
+    setState(() {
+      favoriteProductIds = updatedFavorites;
+    });
+
+    try {
+      // Send the entire updated list to the backend
+      await ApiService.updateUserPreferences({
+        "favorites": updatedFavorites.toList() // Convert Set back to List for JSON
+      });
+      // Optional: Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(isCurrentlyFavorite ? 'Retiré des favoris' : 'Ajouté aux favoris')),
+      );
+    } catch (e) {
+      // Revert UI change on error
+      setState(() {
+        favoriteProductIds.contains(productId)
+            ? favoriteProductIds.remove(productId)
+            : favoriteProductIds.add(productId); // Revert the toggle
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors de la mise à jour des favoris: $e')),
+      );
+      // Optionally re-fetch preferences to ensure consistency
+      // await fetchPreferences();
+    }
+  }
+
 
   void _showProductBottomSheet(dynamic product, dynamic seller) {
     showModalBottomSheet(
@@ -119,6 +230,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Combine loading states
+    final bool stillLoading = loading || promotionsLoading || loadingPreferences;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: PreferredSize(
@@ -135,10 +249,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      body: loading
+      body: stillLoading // Use combined loading state
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: fetchProducts,
+              onRefresh: _loadInitialData, // Refresh all data
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 children: [
@@ -271,7 +385,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       final firstSeller = sellers.isNotEmpty ? sellers[0] : null;
                       return GestureDetector(
                         onTap: () => _showProductBottomSheet(product, firstSeller),
-                        child: _ProductCard(product: product, seller: firstSeller),
+                        // Pass favorite IDs and toggle function to the card
+                        child: _ProductCard(
+                          product: product,
+                          seller: firstSeller,
+                          favoriteProductIds: favoriteProductIds,
+                          onToggleFavorite: _toggleFavorite, // Pass the function
+                        ),
                       );
                     },
                   ),
@@ -283,11 +403,20 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ** 2. Update _ProductCard Widget **
+
 class _ProductCard extends StatelessWidget {
   final dynamic product;
   final dynamic seller;
+  final Set<String> favoriteProductIds; // Receive the set of favorite IDs
+  final Function(String) onToggleFavorite; // Receive the toggle function
 
-  const _ProductCard({required this.product, required this.seller});
+  const _ProductCard({
+    required this.product,
+    required this.seller,
+    required this.favoriteProductIds, // Add to constructor
+    required this.onToggleFavorite,   // Add to constructor
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -318,6 +447,8 @@ class _ProductCard extends StatelessWidget {
     } else {
       sellerImageWidget = const Icon(Icons.agriculture, size: 48);
     }
+
+    bool isFavorite = favoriteProductIds.contains(product['_id']);
 
     return Container(
       decoration: BoxDecoration(
@@ -377,8 +508,22 @@ class _ProductCard extends StatelessWidget {
               backgroundColor: const Color(0xFFF3F8F7),
               radius: 18,
               child: IconButton(
-                icon: const Icon(Icons.favorite_border, color: Color(0xFF00916E)),
-                onPressed: () {},
+                // Update icon based on isFavorite status
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.redAccent : const Color(0xFF00916E), // Change color for favorite
+                ),
+                onPressed: () {
+                  // Fix: Pass the productId (String) instead of the favoriteProductIds (Set)
+                  if (productId != null) {
+                    onToggleFavorite(productId); // Call the toggle function with the correct product ID
+                  } else {
+                    // Keep the error message for missing product ID
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Erreur: ID du produit manquant')),
+                    );
+                  }
+                },
                 iconSize: 20,
                 padding: EdgeInsets.zero,
               ),
