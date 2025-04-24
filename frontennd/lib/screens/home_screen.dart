@@ -408,14 +408,14 @@ class _HomeScreenState extends State<HomeScreen> {
 class _ProductCard extends StatelessWidget {
   final dynamic product;
   final dynamic seller;
-  final Set<String> favoriteProductIds; // Receive the set of favorite IDs
-  final Function(String) onToggleFavorite; // Receive the toggle function
+  final Set<String> favoriteProductIds;
+  final Function(String) onToggleFavorite;
 
   const _ProductCard({
     required this.product,
     required this.seller,
-    required this.favoriteProductIds, // Add to constructor
-    required this.onToggleFavorite,   // Add to constructor
+    required this.favoriteProductIds,
+    required this.onToggleFavorite,
   });
 
   @override
@@ -423,7 +423,6 @@ class _ProductCard extends StatelessWidget {
     Widget sellerImageWidget;
     if (seller?['image'] != null && seller['image'].isNotEmpty) {
       if (seller['image'].startsWith('data:image')) {
-        // It's a base64 image string
         final base64Str = seller['image'].replaceFirst(RegExp(r'data:image/[^;]+;base64,'), '');
         sellerImageWidget = ClipRRect(
           borderRadius: BorderRadius.circular(12),
@@ -434,7 +433,6 @@ class _ProductCard extends StatelessWidget {
           ),
         );
       } else {
-        // It's a URL
         sellerImageWidget = ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.network(
@@ -448,7 +446,9 @@ class _ProductCard extends StatelessWidget {
       sellerImageWidget = const Icon(Icons.agriculture, size: 48);
     }
 
-    bool isFavorite = favoriteProductIds.contains(product['_id']);
+    // Fix: Define productId here
+    final productId = product['_id']?.toString();
+    bool isFavorite = productId != null && favoriteProductIds.contains(productId);
 
     return Container(
       decoration: BoxDecoration(
@@ -508,17 +508,15 @@ class _ProductCard extends StatelessWidget {
               backgroundColor: const Color(0xFFF3F8F7),
               radius: 18,
               child: IconButton(
-                // Update icon based on isFavorite status
                 icon: Icon(
                   isFavorite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavorite ? Colors.redAccent : const Color(0xFF00916E), // Change color for favorite
+                  color: isFavorite ? Colors.redAccent : const Color(0xFF00916E),
                 ),
                 onPressed: () {
-                  // Fix: Pass the productId (String) instead of the favoriteProductIds (Set)
+                  // Fix: Use productId extracted above
                   if (productId != null) {
-                    onToggleFavorite(productId); // Call the toggle function with the correct product ID
+                    onToggleFavorite(productId);
                   } else {
-                    // Keep the error message for missing product ID
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Erreur: ID du produit manquant')),
                     );
