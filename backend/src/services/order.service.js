@@ -1,66 +1,151 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 
+// Helper to get seller index by sellerId
+const findSellerIndex = (product, sellerId) => {
+  return product.sellers.findIndex(s => s._id.toString() === sellerId.toString());
+};
+
 exports.createOrder = async (buyerId, data) => {
-  const { product: productId, sellerIndex, quantity, deliveryInfo } = data;
+  const { items, deliveryInfo } = data;
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("Order must contain at least one item");
+  }
 
-  const product = await Product.findById(productId);
-  if (!product) throw new Error("Product not found");
+  let totalOrderPrice = 0;
+  const orderItems = [];
 
-  const seller = product.sellers[sellerIndex];
-  if (!seller) throw new Error("Seller not found for given index");
-  if (quantity > seller.stock) throw new Error("Not enough stock");
+  for (const item of items) {
+    const { productId, seller, weight, unit, price } = item;
+    const product = await Product.findById(productId);
+    if (!product) throw new Error(`Product not found: ${productId}`);
 
-  const pricePerUnit = seller.price;
-  const discount = seller.discounts && seller.discounts.expiresAt > Date.now()
-    ? seller.discounts.percentage
-    : 0;
+    const sellerIndex = findSellerIndex(product, seller);
+    if (sellerIndex === -1) throw new Error(`Seller not found for product ${productId}`);
 
-  const totalPrice = quantity * pricePerUnit * (1 - discount / 100);
+    const sellerObj = product.sellers[sellerIndex];
+    if (weight > sellerObj.stock) throw new Error(`Not enough stock for product ${productId}`);
 
-  // Update stock
-  seller.stock -= quantity;
-  await product.save();
+    // Calculate discount if any
+    let discount = 0;
+    if (sellerObj.discounts && sellerObj.discounts.expiresAt > Date.now()) {
+      discount = sellerObj.discounts.percentage;
+    }
+
+    const pricePerUnit = price || sellerObj.price;
+    const totalPrice = weight * pricePerUnit * (1 - discount / 100);
+
+    // Update stock
+    sellerObj.stock -= weight;
+    await product.save();
+
+    totalOrderPrice += totalPrice;
+
+    orderItems.push({
+      product: productId,
+      seller: seller,
+      sellerIndex,
+      weight,
+      unit,
+      pricePerUnit,
+      discountPercentage: discount,
+      totalPrice
+    });
+  }
 
   const order = await Order.create({
     buyer: buyerId,
-    product: productId,
-    sellerIndex,
-    quantity,
-    pricePerUnit,
-    discountPercentage: discount,
-    totalPrice,
+    items: orderItems,
+    totalPrice: totalOrderPrice,
     deliveryInfo
   });
 
-  return order;
+  return { "success": true, "order": order };
 };
 
 exports.getOrdersByBuyer = async (buyerId) => {
-  return await Order.find({ buyer: buyerId })
-    .populate("product", "name category")
+  const orders = await Order.find({ buyer: buyerId })
+    .populate("items.product", "name category sellers")
     .sort({ createdAt: -1 });
+
+  // Enrich each order's items with productName, sellerName, and price
+  return orders.map(order => {
+    const orderObj = order.toObject();
+    orderObj.items = orderObj.items.map(item => {
+      let productName = '';
+      let sellerName = '';
+      let price = item.pricePerUnit;
+
+      if (item.product) {
+        productName = item.product.name || '';
+        // Find the seller in the product's sellers array
+        if (item.product.sellers && Array.isArray(item.product.sellers)) {
+          const sellerObj = item.product.sellers.find(s => s._id.toString() === item.seller.toString());
+          if (sellerObj) {
+            sellerName = sellerObj.name || '';
+            // Optionally, you could use sellerObj.price if you want the latest price
+          }
+        }
+      }
+
+      return {
+        ...item,
+        productName,
+        sellerName,
+        price
+      };
+    });
+    return orderObj;
+  });
 };
 
-exports.getOrderById = async (orderId, userId) => {
-  const order = await Order.findById(orderId).populate("product", "name category sellers");
-  if (!order) throw new Error("Order not found");
+exports.getOrdersBySeller = async (sellerId) => {
+  // Find orders where any item has seller == sellerId
+  const orders = await Order.find({ "items.seller": sellerId })
+    .populate("items.product", "name category sellers")
+    .sort({ createdAt: -1 });
 
-  const sellerUser = order.product.sellers[order.sellerIndex]._id?.toString();
-  if (order.buyer.toString() !== userId && sellerUser !== userId) {
-    throw new Error("Access denied");
+  // Enrich each order's items with productName, sellerName, and price
+  return orders.map(order => {
+    const orderObj = order.toObject();
+    orderObj.items = orderObj.items
+      .filter(item => item.seller.toString() === sellerId.toString()) // Only include items for this seller
+      .map(item => {
+        let productName = '';
+        let sellerName = '';
+        let price = item.pricePerUnit;
+
+        if (item.product) {
+          productName = item.product.name || '';
+          // Find the seller in the product's sellers array
+          if (item.product.sellers && Array.isArray(item.product.sellers)) {
+            const sellerObj = item.product.sellers.find(s => s._id.toString() === sellerId.toString());
+            if (sellerObj) {
+              sellerName = sellerObj.name || '';
+              // Optionally, you could use sellerObj.price if you want the latest price
+            }
+          }
+        }
+
+        return {
+          ...item,
+          productName,
+          sellerName,
+          price
+        };
+      });
+    return orderObj;
+  });
+};
+
+exports.deleteOrder = async (userId, orderId) => {
+  const order = await Order.findById(orderId);
+  if (!order) {
+    throw new Error("Order not found");
   }
-
-  return order;
-};
-
-exports.updateOrderStatus = async (orderId, newStatus, userId) => {
-  const order = await Order.findById(orderId).populate("product");
-  if (!order) throw new Error("Order not found");
-
-  const sellerUser = order.product.sellers[order.sellerIndex]._id?.toString();
-  if (sellerUser !== userId) throw new Error("Unauthorized");
-
-  order.status = newStatus;
-  return await order.save();
+  if (order.buyer.toString() !== userId.toString()) {
+    throw new Error("Unauthorized: Only the buyer can delete this order");
+  }
+  await Order.deleteOne({ _id: orderId });
+  return { success: true, message: "Order deleted successfully" };
 };

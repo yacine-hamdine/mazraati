@@ -18,6 +18,15 @@ exports.getMyOrders = async (req, res) => {
   }
 };
 
+exports.getMyOrdered = async (req, res) => {
+  try {
+    const orders = await orderService.getOrdersBySeller(req.user.id);
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 exports.getOrderById = async (req, res) => {
   try {
     const order = await orderService.getOrderById(req.params.id, req.user.id);
@@ -31,6 +40,15 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const order = await orderService.updateOrderStatus(req.params.id, req.body.status, req.user.id);
     res.json(order);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.deleteOrder = async (req, res) => {
+  try {
+    const result = await orderService.deleteOrder(req.user.id, req.params.id);
+    res.status(201).json(result);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

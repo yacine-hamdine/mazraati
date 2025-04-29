@@ -1,62 +1,68 @@
 const mongoose = require('mongoose');
 
+const orderItemSchema = new mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    required: true,
+  },
+  seller: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  sellerIndex: {
+    type: Number,
+    required: true,
+  },
+  weight: {
+    type: Number,
+    required: true,
+    min: 1,
+  },
+  unit: {
+    type: String,
+    required: true,
+  },
+  pricePerUnit: {
+    type: Number,
+    required: true,
+  },
+  discountPercentage: {
+    type: Number,
+    default: 0,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+  }
+}, { _id: false });
+
 const orderSchema = new mongoose.Schema({
   buyer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
-
-  product: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+  items: {
+    type: [orderItemSchema],
     required: true,
+    validate: [arr => arr.length > 0, 'Order must have at least one item']
   },
-
-  sellerIndex: {
-    type: Number,
-    required: true,
-  },
-
-  quantity: {
-    type: Number,
-    required: true,
-    min: 1,
-  },
-
-  pricePerUnit: {
-    type: Number,
-    required: true,
-  },
-
-  discountPercentage: {
-    type: Number,
-    default: 0,
-  },
-
   totalPrice: {
     type: Number,
     required: true,
   },
-
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'],
     default: 'pending',
   },
-
-//   paymentStatus: {
-//     type: String,
-//     enum: ['unpaid', 'paid', 'refunded'],
-//     default: 'unpaid',
-//   },
-
   deliveryInfo: {
-    address: { type: String, required: true },
+    address: { type: String, default: '' },
     expectedAt: { type: Date },
     deliveredAt: { type: Date },
   },
-
   createdAt: {
     type: Date,
     default: Date.now,

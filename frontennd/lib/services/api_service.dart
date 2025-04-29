@@ -104,6 +104,11 @@ class ApiService {
     return jsonDecode(res.body);
   }
 
+  static Future<List<dynamic>> getMyOrdered() async {
+    final res = await _authorizedRequest('/orders/mine');
+    return jsonDecode(res.body);
+  }
+
   static Future<Map<String, dynamic>> createOrder(Map<String, dynamic> body) async {
     final res = await _authorizedRequest('/orders', method: 'POST', body: body);
     return jsonDecode(res.body);
@@ -120,6 +125,11 @@ class ApiService {
       method: 'PATCH',
       body: {'status': status},
     );
+    return jsonDecode(res.body);
+  }
+
+  static Future<Map<String, dynamic>> deleteOrder(String id) async {
+    final res = await _authorizedRequest('/orders/$id', method: 'DELETE');
     return jsonDecode(res.body);
   }
 

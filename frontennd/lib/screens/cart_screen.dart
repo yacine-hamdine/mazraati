@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/cart_service.dart';
 import 'dart:convert';
+import '../services/api_service.dart'; // <-- Add this import
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -12,11 +13,20 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
+  // Add state for orders
+  List<dynamic> myOrders = [];
+  bool loadingOrders = false;
+
   @override
   void initState() {
     super.initState();
     CartService().addListener(_onCartChanged);
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.index == 1) {
+        fetchOrders();
+      }
+    });
   }
 
   @override
@@ -28,6 +38,88 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
 
   void _onCartChanged() {
     setState(() {});
+  }
+
+  // Fetch orders from API
+  Future<void> fetchOrders() async {
+    setState(() {
+      loadingOrders = true;
+    });
+    try {
+      final orders = await ApiService.getMyOrders();
+      setState(() {
+        myOrders = orders;
+        loadingOrders = false;
+      });
+    } catch (e) {
+      setState(() {
+        loadingOrders = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch orders: $e')),
+      );
+    }
+  }
+
+  // Place order using API
+  Future<void> placeOrder() async {
+    final cartItems = CartService().items;
+    if (cartItems.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Your cart is empty!')),
+      );
+      return;
+    }
+
+    // Prepare order body
+    final orderBody = {
+      "items": cartItems.map((item) => {
+        "productId": item.product['_id'],
+        "seller": item.seller['_id'],
+        "weight": item.weight,
+        "unit": item.unit,
+        "price": item.seller['price'],
+      }).toList(),
+      // Add more fields if needed (e.g., address, notes)
+    };
+
+    try {
+      final res = await ApiService.createOrder(orderBody);
+      if (res['success'] == true || res['status'] == 'success' || res['order'] != null) {
+        CartService().clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Order placed successfully!')),
+        );
+        // Optionally, switch to orders tab and refresh
+        _tabController.animateTo(1);
+        fetchOrders();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res['message'] ?? 'Failed to place order')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error placing order: $e')),
+      );
+    }
+  }
+
+  // Delete order using API
+  Future<void> deleteOrder(String orderId) async {
+    try {
+      await ApiService.deleteOrder(orderId);
+      setState(() {
+        myOrders.removeWhere((order) => order['_id'] == orderId);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Order deleted')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete order: $e')),
+      );
+    }
   }
 
   @override
@@ -211,28 +303,124 @@ class _CartScreenState extends State<CartScreen> with SingleTickerProviderStateM
                       ),
                       elevation: 0,
                     ),
-                    onPressed: () {
-                      // TODO: Purchase logic will be implemented later
-                    },
+                    onPressed: placeOrder,
                   ),
                 ),
               ),
             ],
           ),
           // Orders Tab
-          Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.receipt_long, size: 60, color: Color(0xFF00826C)),
-                SizedBox(height: 16),
-                Text(
-                  "Aucune commande pour le moment",
-                  style: TextStyle(fontSize: 18, color: Colors.black54),
-                ),
-              ],
-            ),
-          ),
+          loadingOrders
+              ? const Center(child: CircularProgressIndicator())
+              : myOrders.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.receipt_long, size: 60, color: Color(0xFF00826C)),
+                          SizedBox(height: 16),
+                          Text(
+                            "Aucune commande pour le moment",
+                            style: TextStyle(fontSize: 18, color: Colors.black54),
+                          ),
+                        ],
+                      ),
+                    )
+                  : RefreshIndicator(
+                      onRefresh: fetchOrders,
+                      child: ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                        itemCount: myOrders.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          final order = myOrders[index];
+                          final items = order['items'] as List<dynamic>? ?? [];
+                          final status = order['status'] ?? 'En attente';
+                          final createdAt = order['createdAt'] ?? '';
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ExpansionTile(
+                              title: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Commande #${order['_id']?.substring(order['_id'].length - 6) ?? ''}",
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: status == 'completed'
+                                          ? Colors.green[100]
+                                          : status == 'cancelled'
+                                              ? Colors.red[100]
+                                              : Colors.orange[100],
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      status,
+                                      style: TextStyle(
+                                        color: status == 'completed'
+                                            ? Colors.green
+                                            : status == 'cancelled'
+                                                ? Colors.red
+                                                : Colors.orange,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              subtitle: Text(
+                                createdAt.toString().split('T').first,
+                                style: const TextStyle(color: Colors.black54, fontSize: 13),
+                              ),
+                              children: [
+                                ...items.map((item) {
+                                  return ListTile(
+                                    title: Text(item['productName'] ?? 'Produit'),
+                                    subtitle: Text(
+                                      "Vendeur: ${item['sellerName'] ?? ''}\nPoids: ${item['weight']} ${item['unit']}",
+                                    ),
+                                    trailing: Text(
+                                      "${item['price']} DZA",
+                                      style: const TextStyle(
+                                        color: Color(0xFF00916E),
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                                Align(
+                                  alignment: Alignment.centerRight,
+                                  child: TextButton.icon(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    label: const Text("Supprimer", style: TextStyle(color: Colors.red)),
+                                    onPressed: () async {
+                                      final orderId = order['_id'];
+                                      if (orderId != null) {
+                                        await deleteOrder(orderId);
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
         ],
       ),
     );
